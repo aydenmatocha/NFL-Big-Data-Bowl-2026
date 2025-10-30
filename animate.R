@@ -30,10 +30,16 @@ animate_bef <- function(week, game, play) {
   play <- merged %>%
     filter(game_id == game, play_id == play)
   
+  play <- set_distance_values(play)
+  
+  man <- play %>% filter(man_def == TRUE)
+  rec <- play %>% filter(player_role == "Targeted Receiver")
+  
   nfl_field <- geom_football("nfl", x_trans = 60, y_trans = 26.6667)
   
   play_anim <- nfl_field +
     geom_point(data = play, aes(x, y), color = play$color, size = 5) +
+    geom_segment(data = man, aes(x, y, xend = rec$x, yend = rec$y),color = "black", linewidth = 1.2) +
     transition_time(frame_id)
   
   return(animate(play_anim, fps = 10, nframes = max(play$frame_id, na.rm = TRUE)))
@@ -54,6 +60,14 @@ animate_aft <- function(week, game, play) {
   supplementary <- read.csv("data/supplementary_data.csv") %>%
     select(game_id, play_id, possession_team, defensive_team, home_team_abbr, visitor_team_abbr)
   
+  #targeted_id <- week_data_input %>%
+    #filter(player_role == "Targeted Receiver") %>%
+    #pull(nfl_id) %>%
+    #unique()
+  
+  #week_data_output <- week_data_output %>%
+    #mutate(player_role = ifelse(nfl_id == targeted_id, "Targeted Receiver", player_role))
+  
   merged <- week_data %>%
     left_join(week_data_input,
               by = c("game_id", "play_id", "nfl_id")) %>%
@@ -70,10 +84,16 @@ animate_aft <- function(week, game, play) {
   play <- merged %>%
     filter(game_id == game, play_id == play)
   
+  play <- set_distance_values(play)
+  
+  man <- play %>% filter(man_def == TRUE)
+  rec <- play %>% filter(player_role == "Targeted Receiver")
+  
   nfl_field <- geom_football("nfl", x_trans = 60, y_trans = 26.6667)
   
   play_anim <- nfl_field +
     geom_point(data = play, aes(x, y), color = play$color, size = 5) +
+    geom_segment(data = man, aes(x, y, xend = rec$x, yend = rec$y),color = "black", linewidth = 1.2) +
     transition_time(frame_id)
   
   return(animate(play_anim, fps = 10, nframes = max(play$frame_id, na.rm = TRUE)))
@@ -88,11 +108,16 @@ animate_full <- function(week, game, play) {
   }
   file <- paste("data/input_2023_w", zero, week, ".csv", sep = "")
   week_data_input <- read.csv(file) %>%
-    filter(game_id == game, play_id == play, player_side == "Defense" | player_role == "Targeted Receiver" | player_role == "Passer")
+    filter(game_id == game, play_id == play)
   file <- paste("data/output_2023_w", zero, week, ".csv", sep = "")
   week_data_output <- read.csv(file) %>%
     filter(game_id == game, play_id == play) %>%
     mutate(frame_id = frame_id + max(week_data_input$frame_id))
+  
+  output_ids <- unique(week_data_output$nfl_id)
+  week_data_input <- week_data_input %>%
+    filter(player_role == "Passer" | nfl_id %in% output_ids)
+  
   supplementary <- read.csv("data/supplementary_data.csv") %>%
     select(game_id, play_id, possession_team, defensive_team, home_team_abbr, visitor_team_abbr)
   
@@ -124,17 +149,23 @@ animate_full <- function(week, game, play) {
   
   play <- merged %>%
     filter(game_id == game, play_id == play)
+
+  play <- set_distance_values(play)
+  
+  man <- play %>% filter(man_def == TRUE)
+  rec <- play %>% filter(player_role == "Targeted Receiver")
   
   nfl_field <- geom_football("nfl", x_trans = 60, y_trans = 26.6667)
   
   play_anim <- nfl_field +
     geom_point(data = play, aes(x, y), color = play$color, size = 5) +
     geom_point(data = ball_landing, aes(x, y), shape = 4, color = "black") +
+    geom_segment(data = man, aes(x, y, xend = rec$x, yend = rec$y),color = "black", linewidth = 1.2) +
     transition_time(frame_id)
   
   return(animate(play_anim, fps = 10, nframes = max(play$frame_id, na.rm = TRUE)))
 }
 
 animate_full(1, 2023090700, 194)
-
+#animate_bef(1, 2023090700, 194)
 #animate_aft(1, 2023090700, 194)

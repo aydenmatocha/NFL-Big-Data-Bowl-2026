@@ -34,11 +34,11 @@ get_total_distance <- function(input_df) {
   return(input_df)
 }
 
-week1 <- read.csv("data/input_2023_w01.csv") %>%
-  filter(game_id == 2023090700, play_id == 194)
+#week1 <- read.csv("data/input_2023_w01.csv") %>%
+  #filter(game_id == 2023090700, play_id == 194)
 
-test1 <- get_distance(week1)
+#test1 <- get_distance(week1)
 
-test2 <- get_total_distance(test1) %>%
-  filter(nfl_id == 54653)
-test2
+#test2 <- get_total_distance(test1) %>%
+  #filter(nfl_id == 54653)
+#test2
