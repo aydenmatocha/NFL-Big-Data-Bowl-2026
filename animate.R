@@ -64,13 +64,9 @@ animate_aft <- function(week, game, play) {
     filter(game_id == game, play_id == play) %>%
     select(game_id, play_id, possession_team, defensive_team, home_team_abbr, visitor_team_abbr, pass_result)
   
-  #targeted_id <- week_data_input %>%
-    #filter(player_role == "Targeted Receiver") %>%
-    #pull(nfl_id) %>%
-    #unique()
-  
-  #week_data_output <- week_data_output %>%
-    #mutate(player_role = ifelse(nfl_id == targeted_id, "Targeted Receiver", player_role))
+  pass_result_val <- supplementary %>%
+    pull(pass_result) %>%
+    unique()
   
   merged <- week_data_output %>%
     left_join(week_data_input,
@@ -92,7 +88,14 @@ animate_aft <- function(week, game, play) {
     frame_id = 1:final_frame,
     x = unique(play$ball_land_x),
     y = unique(play$ball_land_y),
-  )
+    pass_result = pass_result_val
+  ) %>%
+    mutate(result_color = case_when(
+      pass_result == "C" ~ "green",
+      pass_result == "I" ~ "black",
+      pass_result == "IN" ~ "red",
+      TRUE ~ "gray"
+    ))
   
   man <- play %>% filter(man_def == TRUE)
   rec <- play %>% filter(player_role == "Targeted Receiver")
@@ -190,6 +193,6 @@ animate_full <- function(week, game, play) {
   return(animate(play_anim, fps = 10, nframes = max(play$frame_id, na.rm = TRUE)))
 }
 
-animate_full(1, 2023090700, 194)
+#animate_full(1, 2023090700, 194)
 #animate_bef(1, 2023090700, 194)
-#animate_aft(1, 2023090700, 194)
+animate_aft(1, 2023090700, 194)
