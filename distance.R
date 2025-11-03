@@ -10,12 +10,17 @@ get_distance <- function(input_df) {
   # Get receiver x,y
   receiver <- input_df %>%
     filter(player_role == "Targeted Receiver") %>%
-    select(x, y)
+    select(frame_id, rec_x = x, rec_y = y) %>%
+    distinct(frame_id, .keep_all = TRUE)
   
   # Assign defenders a variable "distance_from_rec" (the distance from the receiver)
-  input_df <- input_df %>% 
-    mutate(dist_from_rec = if_else(
-      player_side == "Defense", sqrt((receiver$x - x)^2 + (receiver$y - y)^2), NA))
+  input_df <- input_df %>%
+    left_join(receiver, by = "frame_id") %>%
+    mutate(
+      dist_from_rec = if_else(player_side == "Defense",
+        sqrt((rec_x - x)^2 + (rec_y - y)^2), NA_real_)
+    ) %>%
+    select(-rec_x, -rec_y)
   
   return(input_df)
 }
