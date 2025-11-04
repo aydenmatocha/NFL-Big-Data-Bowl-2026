@@ -15,7 +15,7 @@ animate_bef <- function(week, game, play) {
     filter(game_id == game, play_id == play)
   supplementary <- read.csv("data/supplementary_data.csv") %>%
     filter(game_id == game, play_id == play) %>%
-    select(game_id, play_id, possession_team, defensive_team, home_team_abbr, visitor_team_abbr)
+    select(game_id, play_id, possession_team, defensive_team)
   
   merged <- week_data %>%
     left_join(supplementary, by = c("game_id", "play_id")) %>%
@@ -62,7 +62,7 @@ animate_aft <- function(week, game, play) {
     filter(game_id == game, play_id == play)
   supplementary <- read.csv("data/supplementary_data.csv") %>%
     filter(game_id == game, play_id == play) %>%
-    select(game_id, play_id, possession_team, defensive_team, home_team_abbr, visitor_team_abbr, pass_result)
+    select(game_id, play_id, possession_team, defensive_team, pass_result)
   
   pass_result_val <- supplementary %>%
     pull(pass_result) %>%
@@ -134,7 +134,7 @@ animate_full <- function(week, game, play) {
   
   supplementary <- read.csv("data/supplementary_data.csv") %>%
     filter(game_id == game, play_id == play) %>%
-    select(game_id, play_id, possession_team, defensive_team, home_team_abbr, visitor_team_abbr, pass_result)
+    select(game_id, play_id, possession_team, defensive_team, pass_result)
   
   player_roles <- week_data_input %>%
     distinct(nfl_id, player_side, player_role)
