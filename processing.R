@@ -46,6 +46,23 @@ combine_week <- function(week) {
   return(combined)
 }
 
+set_week_values <- function(week) {
+  week_df <- combine_week(week)
+  
+  # Get distance and closing separation values
+  week_df <- week_df %>%
+    group_by(game_id, play_id) %>%
+    group_modify(~ set_distance_values(.x)) %>%
+    ungroup()
+  
+  # Get closing separation values
+  
+  return(week_df)
+}
+
 test1 <- combine_week(1)
 test1 <- test1 %>% filter(game_id == 2023090700, play_id == 194)
 test1 <- set_distance_values(test1)
+
+test2 <- set_week_values(1)
+test2 <- test2 %>% filter(game_id == 2023090700, play_id == 194)
