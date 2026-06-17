@@ -3,6 +3,7 @@ library(tidyverse)
 set_distance_values <- function(input_df) {
   input_df <- get_distance(input_df)
   input_df <- get_total_distance(input_df)
+  
   return(input_df)
 }
 
@@ -31,6 +32,10 @@ get_total_distance <- function(input_df) {
     group_by(nfl_id) %>%
     summarize(total_distance = sum(dist_from_rec, na.rm = TRUE))
   
+  if (nrow(total_distance) == 0) {
+    return(NULL)
+  }
+  
   lowest_id <- total_distance %>% slice_min(total_distance) %>% pull(nfl_id)
   
   input_df <- input_df %>%
@@ -39,6 +44,3 @@ get_total_distance <- function(input_df) {
   return(input_df)
 }
 
-week1 <- read.csv("data/input_2023_w01.csv") %>%
-  filter(game_id == 2023090700, play_id == 194)
-week1dis <- set_distance_values(week1)

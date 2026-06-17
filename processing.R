@@ -10,6 +10,14 @@ combine_week <- function(week) {
   input_df <- read.csv(input_file)
   output_df <- read.csv(output_file)
   
+  # Only keep players in the output (per play)
+  #output_players <- output_df %>%
+  #  distinct(game_id, play_id, nfl_id)
+  #print(output_players)
+
+  #input_df <- input_df %>%
+  #  semi_join(output_players, by = c("game_id", "play_id", "nfl_id"))
+  
   # Get the throw frame (last frame from input) per play
   throw_frames <- input_df %>%
     group_by(game_id, play_id) %>%
@@ -18,8 +26,7 @@ combine_week <- function(week) {
   # Pull player-level metadata from input to join onto output
   player_meta <- input_df %>%
     distinct(nfl_id, player_name, player_height, player_weight,
-             player_birth_date, player_position, player_side, player_role,
-             player_to_predict)
+             player_birth_date, player_position)
   
   # Pull play-level metadata from input to join onto output
   play_meta <- input_df %>%
@@ -52,18 +59,22 @@ set_week_values <- function(week) {
   # Get distance and closing separation values
   week_df <- week_df %>%
     group_by(game_id, play_id) %>%
-    group_modify(~ set_distance_values(.x)) %>%
+    group_modify(~ {
+      result <- set_distance_values(.x)
+      if (is.null(result)) return(tibble())
+      result
+    }) %>%
+    filter(nrow(.) > 0) %>%
     ungroup()
   
-  # Get closing separation values
+  week_df <- week_df %>%
+    group_by(game_id, play_id) %>%
+    group_modify(~ {
+      result <- set_closing_sep(.x)
+      if (is.null(result)) return(tibble())
+      result
+    }) %>%
+    ungroup()
   
   return(week_df)
 }
-
-test1 <- combine_week(1)
-test1 <- test1 %>% filter(game_id == 2023090700, play_id == 194)
-test1 <- set_distance_values(test1)
-
-test2 <- set_week_values(1)
-test2 <- test2 %>% filter(game_id == 2023090700, play_id == 194)
-test3 <- set_closing_sep(test2)
