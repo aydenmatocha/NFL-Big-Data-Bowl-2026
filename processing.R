@@ -66,3 +66,4 @@ test1 <- set_distance_values(test1)
 
 test2 <- set_week_values(1)
 test2 <- test2 %>% filter(game_id == 2023090700, play_id == 194)
+test3 <- set_closing_sep(test2)

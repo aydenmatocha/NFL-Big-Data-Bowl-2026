@@ -1,5 +1,12 @@
 library(tidyverse)
 
+set_closing_sep <- function(input_df) {
+  closing_val <- calc_closing_sep(input_df)
+  input_df <- input_df %>% mutate(closing_sep = closing_val)
+  
+  return(input_df)
+}
+
 calc_closing_sep <- function(input_df) {
   init_sep <- get_init_sep(input_df)
   final_sep <- get_final_sep(input_df)
