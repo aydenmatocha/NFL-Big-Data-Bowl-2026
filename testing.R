@@ -28,3 +28,34 @@ test2 <- test2 %>% filter(game_id == 2023090700, play_id == 194)
 #   semi_join(output_test_players, by = c("game_id", "play_id", "nfl_id"))
 # distance_test <- set_distance_values(filtered_input_test)
 # write.csv(distance_test, "filtered.csv", row.names = FALSE)
+
+play_summary <- week1 %>%
+  group_by(game_id, play_id) %>%
+  group_modify(~ {
+    # data for defender
+    last_frame <- .x %>% pull(throw_frame) %>% unique()
+    def <- .x %>% filter(phase == "pre_throw", man_def == TRUE, frame_id == last_frame) # should be 1 row
+    off <- .x %>% filter(phase == "pre_throw", player_role == "Targeted Receiver", frame_id == last_frame) # should be 1 row
+
+    tibble(
+      # def stats
+      def_dist_at_throw = def$dist_from_rec,
+      def_s_at_throw = def$s,
+      def_a_at_throw = def$a,
+      def_dir_at_throw = def$dir,
+      def_o_at_throw = def$o,
+      
+      # off stats
+      off_s_at_throw = off$s,
+      off_a_at_throw = off$a,
+      off_dir_at_throw = off$dir,
+      off_o_at_throw = off$o,
+      
+      # misc
+      
+      
+      #actual closing sep
+      actual_closing_sep = unique(.x$closing_sep)
+    )
+  }) %>%
+  ungroup()

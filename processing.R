@@ -7,7 +7,7 @@ combine_week <- function(week) {
   input_file  <- paste0("data/input_2023_w",  zero, week, ".csv")
   output_file <- paste0("data/output_2023_w", zero, week, ".csv")
   
-  input_df <- read.csv(input_file)
+  input_df <- read.csv(input_file) #%>% filter(player_to_predict == TRUE) # Only keep players in output
   output_df <- read.csv(output_file)
   
   # Only keep players in the output (per play)
@@ -33,12 +33,17 @@ combine_week <- function(week) {
     distinct(game_id, play_id, play_direction, absolute_yardline_number,
              num_frames_output, ball_land_x, ball_land_y)
   
+  # Pull play-varying player attributes (side/role) to join onto output
+  player_play_meta <- input_df %>%
+    distinct(game_id, play_id, nfl_id, player_side, player_role)
+  
   # Offset output frame_ids so they continue from where input left off
   output_enriched <- output_df %>%
     left_join(throw_frames, by = c("game_id", "play_id")) %>%
     mutate(frame_id = frame_id + throw_frame) %>%
     left_join(player_meta, by = "nfl_id") %>%
     left_join(play_meta,   by = c("game_id", "play_id")) %>%
+    left_join(player_play_meta, by = c("game_id", "play_id", "nfl_id")) %>%
     mutate(phase = "post_throw")
   
   # Tag input frames too, and add throw_frame column to both
