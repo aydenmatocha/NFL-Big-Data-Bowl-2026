@@ -10,14 +10,6 @@ combine_week <- function(week) {
   input_df <- read.csv(input_file) #%>% filter(player_to_predict == TRUE) # Only keep players in output
   output_df <- read.csv(output_file)
   
-  # Only keep players in the output (per play)
-  #output_players <- output_df %>%
-  #  distinct(game_id, play_id, nfl_id)
-  #print(output_players)
-
-  #input_df <- input_df %>%
-  #  semi_join(output_players, by = c("game_id", "play_id", "nfl_id"))
-  
   # Get the throw frame (last frame from input) per play
   throw_frames <- input_df %>%
     group_by(game_id, play_id) %>%
@@ -37,6 +29,19 @@ combine_week <- function(week) {
   player_play_meta <- input_df %>%
     distinct(game_id, play_id, nfl_id, player_side, player_role)
   
+  # Play-level supplementary data (join on game_id + play_id)
+  supp_meta <- read.csv("data/supplementary_data.csv") %>%
+    select(
+      game_id, play_id,
+      route_of_targeted_receiver,
+      pass_location_type,
+      team_coverage_man_zone,
+      team_coverage_type,
+      pass_length,
+      pass_result
+    ) %>%
+    distinct(game_id, play_id, .keep_all = TRUE)
+  
   # Offset output frame_ids so they continue from where input left off
   output_enriched <- output_df %>%
     left_join(throw_frames, by = c("game_id", "play_id")) %>%
@@ -53,7 +58,8 @@ combine_week <- function(week) {
   
   # Bind — output_enriched now has all the same columns as input_tagged
   combined <- bind_rows(input_tagged, output_enriched) %>%
-    arrange(game_id, play_id, nfl_id, frame_id)
+    arrange(game_id, play_id, nfl_id, frame_id) %>%
+    left_join(supp_meta,   by = c("game_id", "play_id"))
   
   return(combined)
 }
