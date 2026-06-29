@@ -41,12 +41,14 @@ summarize_plays <- function(input_df) {
         def_a_at_throw = def$a,
         def_dir_at_throw = def$dir,
         def_o_at_throw = def$o,
+        def_nfl_id = unique(def$nfl_id),
         
         # off stats
         off_s_at_throw = off$s,
         off_a_at_throw = off$a,
         off_dir_at_throw = off$dir,
         off_o_at_throw = off$o,
+        off_nfl_id = unique(off$nfl_id),
         
         # misc
         ball_land_x = unique(.x$ball_land_x),
@@ -67,21 +69,32 @@ summarize_plays <- function(input_df) {
   return(play_summary)
 }
 
-week1_summary <- summarize_plays(week1)
-week2_summary <- summarize_plays(week2)
-week3_summary <- summarize_plays(week3)
-week4_summary <- summarize_plays(week4)
-week5_summary <- summarize_plays(week5)
-week6_summary <- summarize_plays(week6)
-week7_summary <- summarize_plays(week7)
-week8_summary <- summarize_plays(week8)
-week9_summary <- summarize_plays(week9)
-week10_summary <- summarize_plays(week10)
-week11_summary <- summarize_plays(week11)
-week12_summary <- summarize_plays(week12)
-week13_summary <- summarize_plays(week13)
-week14_summary <- summarize_plays(week14)
-week15_summary <- summarize_plays(week15)
-week16_summary <- summarize_plays(week16)
-week17_summary <- summarize_plays(week17)
-week18_summary <- summarize_plays(week18)
+normalize_angle <- function(angle, play_direction) {
+  if_else(play_direction == "left", (angle + 180) %% 360, angle)
+}
+
+# week1_summary <- summarize_plays(week1)
+# week2_summary <- summarize_plays(week2)
+# week3_summary <- summarize_plays(week3)
+# week4_summary <- summarize_plays(week4)
+# week5_summary <- summarize_plays(week5)
+# week6_summary <- summarize_plays(week6)
+# week7_summary <- summarize_plays(week7)
+# week8_summary <- summarize_plays(week8)
+# week9_summary <- summarize_plays(week9)
+# week10_summary <- summarize_plays(week10)
+# week11_summary <- summarize_plays(week11)
+# week12_summary <- summarize_plays(week12)
+# week13_summary <- summarize_plays(week13)
+# week14_summary <- summarize_plays(week14)
+# week15_summary <- summarize_plays(week15)
+# week16_summary <- summarize_plays(week16)
+# week17_summary <- summarize_plays(week17)
+# week18_summary <- summarize_plays(week18)
+combined_summary <- summarize_plays(combined_weeks) %>% filter(team_coverage_man_zone == "MAN_COVERAGE") %>%
+  mutate(
+    def_dir_at_throw = normalize_angle(def_dir_at_throw, play_direction),
+    def_o_at_throw   = normalize_angle(def_o_at_throw, play_direction),
+    off_dir_at_throw = normalize_angle(off_dir_at_throw, play_direction),
+    off_o_at_throw   = normalize_angle(off_o_at_throw, play_direction)
+  )
