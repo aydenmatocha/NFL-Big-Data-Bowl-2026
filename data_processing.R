@@ -23,6 +23,9 @@ combined_weeks <- rbind(week1, week2, week3, week4, week5, week6, week7, week8,
   week9, week10, week11, week12, week13, week14, week15, week16, week17, week18)
 # write to csv?
 
+player_names <- combined_weeks %>%
+  distinct(nfl_id, player_name)
+
 # Summarize every play given a df
 summarize_plays <- function(input_df) {
   play_summary <- input_df %>%

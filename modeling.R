@@ -47,13 +47,35 @@ xgboost_best <- select_best(xgboost_tune, metric = "rmse")
 final_xgboost_wkfl <- xgboost_workflow %>%
   finalize_workflow(xgboost_best)
 
-final_xgboost_fit <- final_xgboost_wkfl %>%
-  fit(plays_train)
+# final_xgboost_fit <- final_xgboost_wkfl %>%
+#   fit(plays_train)
+# 
+# xgboost_predictions <- augment(final_xgboost_fit, new_data = plays_test)
+# 
+# xgboost_table <- xgboost_predictions %>%
+#   metrics(truth = actual_closing_sep, estimate = .pred)
+# 
+# xgboost_table %>%
+#   knitr::kable()
 
-xgboost_predictions <- augment(final_xgboost_fit, new_data = plays_test)
 
-xgboost_table <- xgboost_predictions %>%
+set.seed(49)
+full_folds <- vfold_cv(combined_summary, v = 10, strata = actual_closing_sep)
+
+oof_res <- fit_resamples(
+  final_xgboost_wkfl,
+  resamples = full_folds,
+  control = control_resamples(save_pred = TRUE)
+)
+
+oof_predictions <- collect_predictions(oof_res) %>%
+  # .row lets you join back to combined_summary's row order
+  arrange(.row) %>%
+  bind_cols(combined_summary %>% select(def_nfl_id, game_id, play_id))
+
+xgboost_table <- oof_predictions %>%
   metrics(truth = actual_closing_sep, estimate = .pred)
-
+ 
 xgboost_table %>%
   knitr::kable()
+
