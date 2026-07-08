@@ -27,14 +27,14 @@ leaderboard <- oof_predictions %>%
   mutate(player_name = if_else(player_name == "Asante Samuel", "Asante Samuel Jr.", player_name)) %>% # Fix for Asante Samuel Jr
   left_join(player_ids, by = c("player_name" = "display_name")) %>%
   left_join(rosters_2023, by = "gsis_id") %>%
-  mutate(avg_cse = round(avg_cse, 2)) %>%
+  #mutate(avg_cse = round(avg_cse, 2)) %>%
   arrange(desc(avg_cse))
 
 leaderboard_viz <- leaderboard %>% 
   filter(n_plays >= 10) %>%
   select(player_name, gsis_id, team, position.x, n_plays, avg_cse)
 
-cse_range <- range(leaderboard2$avg_cse, na.rm = TRUE)
+cse_range <- range(leaderboard_viz$avg_cse, na.rm = TRUE)
   
 # Top 10
 top10 <- leaderboard_viz %>%
@@ -44,6 +44,10 @@ top10 <- leaderboard_viz %>%
   tab_header(
     title = "Top 10 Players in Average CSOE",
     subtitle = "2023 Season, Minimum 10 Plays"
+  ) %>%
+  fmt_number(
+    columns = avg_cse,
+    decimals = 2
   ) %>%
   gt_nfl_headshots("gsis_id", height = 35) %>%
   gt_nfl_logos("team", height = 35) %>%
@@ -66,6 +70,10 @@ bottom10 <- leaderboard_viz %>%
   tab_header(
     title = "Bottom 10 Players in Average CSOE",
     subtitle = "2023 Season, Minimum 10 Plays"
+  ) %>%
+  fmt_number(
+    columns = avg_cse,
+    decimals = 2
   ) %>%
   gt_nfl_headshots("gsis_id", height = 35) %>%
   gt_nfl_logos("team", height = 35) %>%

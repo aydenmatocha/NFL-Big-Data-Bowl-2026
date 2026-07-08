@@ -42,7 +42,7 @@ xgboost_tune <- tune_grid(
 )
 show_best(xgboost_tune, metric = "rmse")
 
-xgboost_best <- select_best(xgboost_tune, metric = "rmse")
+xgboost_best <- select_best(xgboost_tune, metric = "rsq")
 
 final_xgboost_wkfl <- xgboost_workflow %>%
   finalize_workflow(xgboost_best)
