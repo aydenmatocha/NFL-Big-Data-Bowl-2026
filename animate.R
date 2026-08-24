@@ -195,4 +195,4 @@ animate_full <- function(week, game, play) {
 
 #animate_full(1, 2023090700, 194)
 #animate_bef(1, 2023090700, 194)
-animate_aft(1, 2023090700, 194)
+#animate_aft(1, 2023090700, 194)

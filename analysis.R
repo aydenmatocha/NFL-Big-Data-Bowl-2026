@@ -15,8 +15,12 @@ rosters_2023 <- nflreadr::load_rosters(seasons = 2023) %>%
   select(gsis_id, team, position) %>%
   distinct(gsis_id, .keep_all = TRUE)
 
-leaderboard <- oof_predictions %>%
+final_results <- oof_predictions %>%
   mutate(cse_residual = actual_closing_sep - .pred) %>%
+  rename(pred_closing_sep = .pred) %>%
+  select(game_id, play_id, def_nfl_id, actual_closing_sep, pred_closing_sep, cse_residual)
+
+leaderboard <- final_results %>%
   group_by(def_nfl_id) %>%
   summarize(
     n_plays = n(),
@@ -30,61 +34,50 @@ leaderboard <- oof_predictions %>%
   #mutate(avg_cse = round(avg_cse, 2)) %>%
   arrange(desc(avg_cse))
 
-leaderboard_viz <- leaderboard %>% 
+leaderboard_viz <- leaderboard %>%
   filter(n_plays >= 10) %>%
   select(player_name, gsis_id, team, position.x, n_plays, avg_cse)
 
 cse_range <- range(leaderboard_viz$avg_cse, na.rm = TRUE)
-  
-# Top 10
+
+# Top 10 Players
 top10 <- leaderboard_viz %>%
   slice_max(avg_cse, n = 10) %>%
   gt() %>%
   gt_theme_538() %>%
-  tab_header(
-    title = "Top 10 Players in Average CSOE",
-    subtitle = "2023 Season, Minimum 10 Plays"
-  ) %>%
-  fmt_number(
-    columns = avg_cse,
-    decimals = 2
-  ) %>%
+  tab_header(title = "Top 10 Players in Average CSOE", subtitle = "2023 Season, Minimum 10 Plays") %>%
+  fmt_number(columns = avg_cse, decimals = 2) %>%
   gt_nfl_headshots("gsis_id", height = 35) %>%
   gt_nfl_logos("team", height = 35) %>%
-  cols_label(player_name = "Player", gsis_id = "", position.x = "pos") %>%
-  data_color(
-    columns = avg_cse,
-    colors = scales::col_numeric(
-      palette = c("red", "white", "green"),
-      domain = cse_range
-    )
-  ) 
+  cols_label(player_name = "Player",
+             gsis_id = "",
+             position.x = "pos") %>%
+  data_color(columns = avg_cse,
+             colors = scales::col_numeric(
+               palette = c("red", "white", "green"),
+               domain = cse_range
+             ))
 
 top10
 
-# Bottom 10
+# Bottom 10 Players
 bottom10 <- leaderboard_viz %>%
   slice_min(avg_cse, n = 10) %>%
   gt() %>%
   gt_theme_538() %>%
-  tab_header(
-    title = "Bottom 10 Players in Average CSOE",
-    subtitle = "2023 Season, Minimum 10 Plays"
-  ) %>%
-  fmt_number(
-    columns = avg_cse,
-    decimals = 2
-  ) %>%
+  tab_header(title = "Bottom 10 Players in Average CSOE", subtitle = "2023 Season, Minimum 10 Plays") %>%
+  fmt_number(columns = avg_cse, decimals = 2) %>%
   gt_nfl_headshots("gsis_id", height = 35) %>%
   gt_nfl_logos("team", height = 35) %>%
-  cols_label(player_name = "Player", gsis_id = "", position.x = "pos") %>%
-  data_color(
-    columns = avg_cse,
-    colors = scales::col_numeric(
-      palette = c("red", "white", "green"),
-      domain = cse_range
-    )
-  ) 
+  cols_label(player_name = "Player",
+             gsis_id = "",
+             position.x = "pos") %>%
+  data_color(columns = avg_cse,
+             colors = scales::col_numeric(
+               palette = c("red", "white", "green"),
+               domain = cse_range
+             ))
 
 bottom10
 
+#good_cse <- final_results %>% filter(cse_residual > 5)
